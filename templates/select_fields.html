@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Select Fields</title>
+</head>
+<body>
+    <h1>Select Fields</h1>
+    <form action="{{ url_for('generate') }}" method="post">
+        <label>
+            <input type="checkbox" name="name" /> Include Name Field
+        </label><br>
+        <label>
+            <input type="checkbox" name="date" /> Include Date Field
+        </label><br>
+        <label>
+            <input type="checkbox" name="hide_points" /> Hide Points
+        </label><br>
+        <label>
+            <input type="checkbox" name="hide_total_points" /> Hide Total Points
+        </label><br>
+        <button type="submit">Generate Test</button>
+    </form>
+</body>
+</html>

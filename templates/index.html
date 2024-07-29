@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .question-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .options {
+            margin: 10px 0;
+        }
+        .option {
+            margin-bottom: 5px;
+        }
+        .controls {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .toggle-btn, .select-all-btn, .deselect-all-btn {
+            margin-right: 10px;
+        }
+    </style>
+    <script>
+        function selectAll() {
+            document.querySelectorAll('.question-checkbox').forEach(cb => cb.checked = true);
+        }
+
+        function deselectAll() {
+            document.querySelectorAll('.question-checkbox').forEach(cb => cb.checked = false);
+        }
+
+        function filterQuestions() {
+            const query = document.getElementById('searchBox').value.toLowerCase();
+            document.querySelectorAll('.question-card').forEach(card => {
+                const text = card.textContent.toLowerCase();
+                card.style.display = text.includes(query) ? 'block' : 'none';
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Test Generator</h1>
+        </div>
+        <div class="controls">
+            <button class="toggle-btn" onclick="selectAll()">Select All</button>
+            <button class="toggle-btn" onclick="deselectAll()">Deselect All</button>
+        </div>
+        <form action="/select_fields" method="post">
+            <input type="text" id="searchBox" onkeyup="filterQuestions()" placeholder="Search questions...">
+            <div class="question-grid">
+                {% for question in questions %}
+                    <div class="question-card">
+                        <div class="question-text">
+                            <strong>Question ({{ question.version }}):</strong>
+                        </div>
+                        <div id="versionA_{{ question.id }}">
+                            <p>{{ question.question_text }}</p>
+                            <div class="options">
+                                {% for option in question.options %}
+                                    <div class="option">{{ option }}</div>
+                                {% endfor %}
+                            </div>
+                            <p>Answer: {{ question.answer }}</p>
+                            <p>Author: {{ question.author }} | Time: {{ question.time }} | Points: {{ question.points }}</p>
+                        </div>
+                        <input type="checkbox" class="question-checkbox" name="question" value="{{ question.id }}">
+                        <label>Include this question</label>
+                    </div>
+                {% endfor %}
+            </div>
+            <button type="submit">Next</button>
+        </form>
+    </div>
+</body>
+</html>

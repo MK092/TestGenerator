@@ -30,11 +30,15 @@ class CustomPDF(FPDF):
         # Footer text
         self.cell(0, 10, 'Copyright by Mateusz Kowalczyk', 0, 0, 'C')
 
-# Home route to display the form and preview questions
+# Home route to display the description and login button
 @app.route('/')
-def index():
+def home():
+    return render_template('home.html')
+
+# Main route to display the form and preview questions
+@app.route('/main')
+def main():
     questions = load_questions()
-    # Flatten question versions for easier display
     flattened_questions = []
     for question in questions:
         for version in question['versions']:

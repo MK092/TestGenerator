@@ -1,25 +1,88 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Select Fields</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .form-group {
+            margin: 20px 0;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        .form-group input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        .button-group {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .button-group button {
+            padding: 10px 20px;
+            margin-right: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button-group button:last-child {
+            margin-right: 0;
+        }
+    </style>
 </head>
 <body>
-    <h1>Select Fields</h1>
-    <form action="{{ url_for('generate') }}" method="post">
+    <div class="container">
+        <div class="header">
+            <h1>Select Additional Fields</h1>
+        </div>
+<form action="{{ url_for('generate') }}" method="post">
+    <div class="form-group">
         <label>
-            <input type="checkbox" name="name" /> Include Name Field
-        </label><br>
+            <input type="checkbox" name="name">
+            Include name field
+        </label>
+    </div>
+    <div class="form-group">
         <label>
-            <input type="checkbox" name="date" /> Include Date Field
-        </label><br>
+            <input type="checkbox" name="date">
+            Include date field
+        </label>
+    </div>
+    <div class="form-group">
         <label>
-            <input type="checkbox" name="hide_points" /> Hide Points
-        </label><br>
+            <input type="checkbox" name="hide_points">
+            Hide points for each question
+        </label>
+    </div>
+    <div class="form-group">
         <label>
-            <input type="checkbox" name="hide_total_points" /> Hide Total Points
-        </label><br>
-        <button type="submit">Generate Test</button>
-    </form>
+            <input type="checkbox" name="hide_total_points">
+            Hide total points
+        </label>
+    </div>
+    <div class="form-group">
+        {% for question in request.form.getlist('selected_question') %}
+            <input type="hidden" name="selected_question" value="{{ question }}">
+        {% endfor %}
+    </div>
+    <button type="submit">Generate PDF</button>
+</form>
+
+    </div>
 </body>
 </html>

@@ -45,6 +45,22 @@
         .toggle-btn, .select-all-btn, .deselect-all-btn {
             margin-right: 10px;
         }
+        .welcome-message {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .logout-button {
+            display: block;
+            width: 200px;
+            margin: 20px auto;
+            padding: 10px;
+            text-align: center;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
     </style>
     <script>
         function selectAll() {
@@ -69,35 +85,48 @@
         <div class="header">
             <h1>Test Generator</h1>
         </div>
+        
+        <!-- Welcome message -->
+        <div class="welcome-message">
+            <p>Cześć, {{ user_name }}</p>
+        </div>
+
         <div class="controls">
             <button class="toggle-btn" onclick="selectAll()">Select All</button>
             <button class="toggle-btn" onclick="deselectAll()">Deselect All</button>
         </div>
-        <form action="/select_fields" method="post">
-            <input type="text" id="searchBox" onkeyup="filterQuestions()" placeholder="Search questions...">
-            <div class="question-grid">
-                {% for question in questions %}
-                    <div class="question-card">
-                        <div class="question-text">
-                            <strong>Question ({{ question.version }}):</strong>
-                        </div>
-                        <div id="versionA_{{ question.id }}">
-                            <p>{{ question.question_text }}</p>
-                            <div class="options">
-                                {% for option in question.options %}
-                                    <div class="option">{{ option }}</div>
-                                {% endfor %}
-                            </div>
-                            <p>Answer: {{ question.answer }}</p>
-                            <p>Author: {{ question.author }} | Time: {{ question.time }} | Points: {{ question.points }}</p>
-                        </div>
-                        <input type="checkbox" class="question-checkbox" name="question" value="{{ question.id }}">
-                        <label>Include this question</label>
-                    </div>
-                {% endfor %}
-            </div>
-            <button type="submit">Next</button>
+
+        <!-- Logout button -->
+        <form action="{{ url_for('logout') }}">
+            <button class="logout-button" type="submit">Wyloguj się</button>
         </form>
+
+<form action="{{ url_for('select_fields') }}" method="post">
+    <input type="text" id="searchBox" onkeyup="filterQuestions()" placeholder="Search questions...">
+    <div class="question-grid">
+        {% for question in questions %}
+            <div class="question-card">
+                <div class="question-text">
+                    <strong>Question ({{ question.version }}):</strong>
+                </div>
+                <div id="versionA_{{ question.id }}">
+                    <p>{{ question.question_text }}</p>
+                    <div class="options">
+                        {% for option in question.options %}
+                            <div class="option">{{ option }}</div>
+                        {% endfor %}
+                    </div>
+                    <p>Answer: {{ question.answer }}</p>
+                    <p>Author: {{ question.author }} | Time: {{ question.time }} | Points: {{ question.points }}</p>
+                </div>
+                <input type="checkbox" class="question-checkbox" name="selected_question" value="{{ question.id }}">
+                <label>Include this question</label>
+            </div>
+        {% endfor %}
+    </div>
+    <button type="submit">Next</button>
+</form>
+
     </div>
 </body>
 </html>

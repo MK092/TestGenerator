@@ -2,65 +2,115 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel</title>
 </head>
 <body>
     <h1>Admin Panel</h1>
-    
-    <!-- Create New User -->
-    <h2>Create New User</h2>
+    <h2>Create User</h2>
     <form method="POST">
         <label for="login">Login:</label>
-        <input type="text" name="login" required>
+        <input type="text" id="login" name="login">
         <br>
         <label for="password">Password:</label>
-        <input type="password" name="password" required>
+        <input type="password" id="password" name="password">
         <br>
         <label for="name">Name:</label>
-        <input type="text" name="name" required>
+        <input type="text" id="name" name="name">
         <br>
         <label for="role">Role:</label>
-        <select name="role">
+        <select id="role" name="role">
             <option value="1">Unverified</option>
             <option value="2">Verified</option>
             <option value="3">Admin</option>
         </select>
         <br>
-        <input type="submit" name="create_user" value="Create User">
+        <label for="subjects">Subjects:</label>
+        <select id="subjects" name="subjects" multiple>
+            {% for subject in subjects %}
+                <option value="{{ subject }}">{{ subject }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <label for="grades">Grades:</label>
+        <select id="grades" name="grades" multiple>
+            {% for grade in grades %}
+                <option value="{{ grade }}">{{ grade }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <button type="submit" name="create_user">Create User</button>
     </form>
-
-    <!-- User Management -->
-    <h2>Manage Users</h2>
+    
+    <h2>Update User Permissions</h2>
     <form method="POST">
-        <label for="login">Select User:</label>
-        <select name="login">
+        <label for="login">Login:</label>
+        <select id="login" name="login">
             {% for user in users %}
                 <option value="{{ user }}">{{ user }}</option>
             {% endfor %}
         </select>
         <br>
+        <label for="subjects">Subjects:</label>
+        <select id="subjects" name="subjects" multiple>
+            {% for subject in subjects %}
+                <option value="{{ subject }}">{{ subject }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <label for="grades">Grades:</label>
+        <select id="grades" name="grades" multiple>
+            {% for grade in grades %}
+                <option value="{{ grade }}">{{ grade }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <button type="submit" name="update_permissions">Update Permissions</button>
+    </form>
 
-        <!-- Change Role -->
-        <label for="role">New Role:</label>
-        <select name="role">
+    <h2>Change User Role</h2>
+    <form method="POST">
+        <label for="login">Login:</label>
+        <select id="login" name="login">
+            {% for user in users %}
+                <option value="{{ user }}">{{ user }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <label for="role">Role:</label>
+        <select id="role" name="role">
             <option value="1">Unverified</option>
             <option value="2">Verified</option>
             <option value="3">Admin</option>
         </select>
-        <input type="submit" name="change_role" value="Change Role">
         <br>
-
-        <!-- Change Password -->
-        <label for="password">New Password:</label>
-        <input type="password" name="password">
-        <input type="submit" name="change_password" value="Change Password">
-        <br>
-
-        <!-- Delete User -->
-        <input type="submit" name="delete_user" value="Delete User">
+        <button type="submit" name="change_role">Change Role</button>
     </form>
 
-    <a href="{{ url_for('logout') }}">Logout</a>
+    <h2>Change User Password</h2>
+    <form method="POST">
+        <label for="login">Login:</label>
+        <select id="login" name="login">
+            {% for user in users %}
+                <option value="{{ user }}">{{ user }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password">
+        <br>
+        <button type="submit" name="change_password">Change Password</button>
+    </form>
+
+    <h2>Delete User</h2>
+    <form method="POST">
+        <label for="login">Login:</label>
+        <select id="login" name="login">
+            {% for user in users %}
+                <option value="{{ user }}">{{ user }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <button type="submit" name="delete_user">Delete User</button>
+    </form>
 </body>
 </html>

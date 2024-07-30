@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Select Subject and Grade</title>
+</head>
+<body>
+    <h1>Select Subject and Grade</h1>
+    <form action="{{ url_for('select_subject_and_grade') }}" method="post">
+        <label for="subject">Subject:</label>
+        <select name="subject" id="subject">
+            <option value="matematyka">Matematyka</option>
+            <option value="fizyka">Fizyka</option>
+            <!-- Add more subjects here -->
+        </select>
+        <br>
+        <label for="grade">Grade:</label>
+        <select name="grade" id="grade">
+            <option value="klasa1">Klasa 1</option>
+            <option value="klasa2">Klasa 2</option>
+            <!-- Add more grades here -->
+        </select>
+        <br>
+        <button type="submit">Select</button>
+    </form>
+</body>
+</html>

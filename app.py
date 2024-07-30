@@ -25,8 +25,9 @@ user_data = {
 }
 
 # Load questions from JSON file
-def load_questions():
-    with open('questions.json', 'r', encoding='utf-8') as f:
+def load_questions(subject, grade):
+    path = os.path.join('questions', subject, grade, 'questions.json')
+    with open(path, 'r', encoding='utf-8') as f:
         questions = json.load(f)
     return questions
 
@@ -55,7 +56,7 @@ def login():
         if login in user_data and check_password_hash(user_data[login]['password'], password):
             session['user'] = login
             session['user_name'] = user_data[login]['name']
-            return redirect(url_for('index'))
+            return redirect(url_for('select_subject_and_grade'))
         else:
             flash('Invalid login or password!', 'error')
     
@@ -67,15 +68,26 @@ def logout():
     session.pop('user_name', None)
     return redirect(url_for('login'))
 
-def check_access(required_role):
+def check_access(required_role, subject=None, grade=None):
     if 'user' not in session:
         return redirect(url_for('login'))
+
+    user = user_data.get(session['user'], {})
+    user_role = user.get('role', 0)
     
-    user_role = user_data.get(session['user'], {}).get('role', 0)
     if user_role < required_role:
         return redirect(url_for('no_access'))
+
+    if subject and grade:
+        permissions = user.get('permissions', {})
+        allowed_subjects = permissions.get('subjects', [])
+        allowed_grades = permissions.get('grades', [])
         
+        if subject not in allowed_subjects or grade not in allowed_grades:
+            return redirect(url_for('no_access'))
+
     return None
+
 
 def flatten_questions(questions):
     flattened_questions = []
@@ -95,9 +107,22 @@ def flatten_questions(questions):
     
 @app.route('/main')
 def index():
-    access_check = check_access(ROLES['verified'])
+    # Check user access and permissions
+    access_check = check_access(ROLES['verified'], subject=session.get('subject'), grade=session.get('grade'))
     if access_check:
         return access_check
+
+    subject = session.get('subject')
+    grade = session.get('grade')
+    if not subject or not grade:
+        return redirect(url_for('select_subject_and_grade'))
+
+    questions = load_questions(subject, grade)
+    flattened_questions = flatten_questions(questions)
+
+    return render_template('index.html', questions=flattened_questions, user_name=session['user'])
+
+
 
     # Logic to get and process questions
     questions = load_questions()
@@ -146,8 +171,21 @@ def wrap_text(pdf, text, max_width):
 
 # Route to generate the quiz PDF
 @app.route('/generate', methods=['POST'])
+@app.route('/generate', methods=['POST'])
 def generate():
-    questions = load_questions()
+    # Pobierz subject i grade z sesji
+    subject = session.get('subject')
+    grade = session.get('grade')
+    
+    # Sprawdź, czy subject i grade są ustawione
+    if not subject or not grade:
+        flash('Subject and grade must be selected!', 'error')
+        return redirect(url_for('select_subject_and_grade'))
+
+    # Wczytaj pytania
+    questions = load_questions(subject, grade)
+    
+    # Pozostała część funkcji
     selected_question_ids = request.form.getlist('selected_question')
     
     selected_questions = []
@@ -165,7 +203,7 @@ def generate():
                         'answer': version['answer'],
                         'version': version['version']
                     })
-
+                    
     name_field = 'name' in request.form
     date_field = 'date' in request.form
     hide_points = 'hide_points' in request.form
@@ -280,7 +318,19 @@ def generate():
     return redirect(url_for('download_files_page'))
 
 def generate_answer_key(selected_question_ids):
-    questions = load_questions()
+    # Pobierz subject i grade z sesji
+    subject = session.get('subject')
+    grade = session.get('grade')
+    
+    # Sprawdź, czy subject i grade są ustawione
+    if not subject or not grade:
+        flash('Subject and grade must be selected!', 'error')
+        return
+
+    # Wczytaj pytania
+    questions = load_questions(subject, grade)
+    
+    # Generowanie klucza odpowiedzi
     pdf = CustomPDF()
     pdf.add_font('DejaVu', '', 'fonts/DejaVuSans.ttf', uni=True)
     pdf.add_font('DejaVu', 'B', 'fonts/DejaVuSans-Bold.ttf', uni=True)
@@ -300,6 +350,7 @@ def generate_answer_key(selected_question_ids):
     
     answer_key_pdf_path = 'static/answer_key.pdf'
     pdf.output(answer_key_pdf_path)
+
 
 @app.route('/download_files_page')
 def download_files_page():
@@ -321,46 +372,56 @@ def admin():
         return access_check
 
     if request.method == 'POST':
+        login = request.form['login']
         if 'create_user' in request.form:
-            login = request.form['login']
             password = request.form['password']
             name = request.form['name']
             role = int(request.form['role'])
+            permissions = {
+                'subjects': request.form.getlist('subjects'),
+                'grades': request.form.getlist('grades')
+            }
             if login in user_data:
                 flash('User already exists!', 'error')
             else:
                 user_data[login] = {
                     'password': generate_password_hash(password),
                     'name': name,
-                    'role': role
+                    'role': role,
+                    'permissions': permissions
                 }
                 flash('User created successfully!', 'success')
-        elif 'change_role' in request.form:
-            login = request.form['login']
-            role = int(request.form['role'])
+        elif 'update_permissions' in request.form:
+            permissions = {
+                'subjects': request.form.getlist('subjects'),
+                'grades': request.form.getlist('grades')
+            }
             if login in user_data:
-                user_data[login]['role'] = role
-                flash('User role updated successfully!', 'success')
-            else:
-                flash('User does not exist!', 'error')
-        elif 'change_password' in request.form:
-            login = request.form['login']
-            password = request.form['password']
-            if login in user_data:
-                user_data[login]['password'] = generate_password_hash(password)
-                flash('User password updated successfully!', 'success')
-            else:
-                flash('User does not exist!', 'error')
-        elif 'delete_user' in request.form:
-            login = request.form['login']
-            if login in user_data:
-                del user_data[login]
-                flash('User deleted successfully!', 'success')
+                user_data[login]['permissions'] = permissions
+                flash('User permissions updated successfully!', 'success')
             else:
                 flash('User does not exist!', 'error')
 
     users = list(user_data.keys())
-    return render_template('admin.html', users=users)
+    subjects = ['matematyka', 'fizyka']
+    grades = ['klasa1', 'klasa2']
+    return render_template('admin.html', users=users, subjects=subjects, grades=grades)
+
+    users = list(user_data.keys())
+    subjects = ['matematyka', 'fizyka']  # Przykładowa lista przedmiotów
+    grades = ['klasa1', 'klasa2']  # Przykładowa lista klas
+    return render_template('admin.html', users=users, subjects=subjects, grades=grades)
+    
+@app.route('/select_subject_and_grade', methods=['GET', 'POST'])
+def select_subject_and_grade():
+    if request.method == 'POST':
+        subject = request.form['subject']
+        grade = request.form['grade']
+        session['subject'] = subject
+        session['grade'] = grade
+        return redirect(url_for('index'))
+    return render_template('select_subject_and_grade.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True)

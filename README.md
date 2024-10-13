@@ -1,2 +1,2 @@
-# TestGenerator
-Generator testów i sprawdzianów
+# Genererator kart pracy
+Z wcześniej przygotowanych zadań
